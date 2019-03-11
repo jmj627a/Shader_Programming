@@ -37,7 +37,7 @@ void Renderer::CreateVertexBufferObjects()
 		-0.5, -0.5, 0.f,  0.5, 0.5, 0.f, 0.5, -0.5, 0.f, //Triangle2
 	};
 
-	glGenBuffers(1, &m_VBORect);
+	glGenBuffers(1, &m_VBORect); //버텍스 버퍼 오브젝트가 성공을 했으면 1보다 큰 수가 리턴
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBORect);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(rect), rect, GL_STATIC_DRAW);
 }
@@ -273,8 +273,9 @@ void Renderer::Test()
 
 	int attribPosition = glGetAttribLocation(m_SolidRectShader, "a_Position");
 	glEnableVertexAttribArray(attribPosition);
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBORect);
-	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBORect); //총 18개의 float point가 들어가있음.
+	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0); //그리고 vbo에 들어가 있는 것을 3개씩 꺼내서 sizeof(float)*3씩 뛰어서 읽어라
+	//저 자리에 0으로 넣으면 알아서 3칸씩 띄라고 하는구나 알고 문제없이 작동함
 
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
