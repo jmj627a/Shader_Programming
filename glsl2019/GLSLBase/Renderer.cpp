@@ -40,6 +40,20 @@ void Renderer::CreateVertexBufferObjects()
 	glGenBuffers(1, &m_VBORect); //버텍스 버퍼 오브젝트가 성공을 했으면 1보다 큰 수가 리턴
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBORect);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(rect), rect, GL_STATIC_DRAW);
+
+	//lecture2
+	float tri[]
+		=
+	{
+		-1.0, -0.0, 0.f, 1.0, 0.0, 0.f, 0.0, 0.5, 0.f //Triangle1
+	};
+
+	glGenBuffers(1, &m_VBOTri); //버텍스 버퍼 오브젝트가 성공을 했으면 1보다 큰 수가 리턴
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOTri);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(tri), tri, GL_STATIC_DRAW);
+
+
+	GenQuadsVBO(1000);
 }
 
 void Renderer::AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum ShaderType)
@@ -280,4 +294,72 @@ void Renderer::Test()
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
 	glDisableVertexAttribArray(attribPosition);
+}
+
+void Renderer::Lecture2()
+{
+	glUseProgram(m_SolidRectShader);
+
+	glEnableVertexAttribArray(0);
+	//glBindBuffer(GL_ARRAY_BUFFER, m_VBOTri); //총 18개의 float point가 들어가있음.
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOQuads); //총 18개의 float point가 들어가있음.
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float)*3, 0); //그리고 vbo에 들어가 있는 것을 3개씩 꺼내서 sizeof(float)*3씩 뛰어서 읽어라
+	//저 자리에 0으로 넣으면 알아서 3칸씩 띄라고 하는구나 알고 문제없이 작동함
+
+	glDrawArrays(GL_TRIANGLES, 0, m_VBOQuadsCount);
+
+	glDisableVertexAttribArray(0);
+}
+
+void Renderer::GenQuadsVBO(int count)
+{
+	float randX, randY;
+	float size = 0.01f;
+	float arraySize = count * 3 * 6;
+	float *vertices = new float[arraySize];
+
+	for (int i = 0; i < count; i++)
+	{
+		int index = i * 18; //4로바꾸면 24가 됨
+		int temp = rand();
+		randX = 2.f*(((float)rand() / (float)RAND_MAX) - 0.5f);
+		randY = 2.f*(((float)rand() / (float)RAND_MAX) - 0.5f);
+
+		vertices[index] = randX - size; index++;
+		vertices[index] = randY - size; index++;
+		vertices[index] = 0.f; index++;
+		//vertices[index] = (float)i; index++;
+
+		vertices[index] = randX - size; index++;
+		vertices[index] = randY + size; index++;
+		vertices[index] = 0.f; index++;
+		//vertices[index] = (float)i; index++;
+
+		vertices[index] = randX + size; index++;
+		vertices[index] = randY + size; index++;
+		vertices[index] = 0.f; index++;
+		//vertices[index] = (float)i; index++;
+
+		vertices[index] = randX - size; index++;
+		vertices[index] = randY - size; index++;
+		vertices[index] = 0.f; index++;
+		//vertices[index] = (float)i; index++;
+
+		vertices[index] = randX + size; index++;
+		vertices[index] = randY + size; index++;
+		vertices[index] = 0.f; index++;
+		//vertices[index] = (float)i; index++;
+
+		vertices[index] = randX + size; index++;
+		vertices[index] = randY - size; index++;
+		vertices[index] = 0.f; index++;
+		//vertices[index] = (float)i; index++;
+	}
+
+	glGenBuffers(1, &m_VBOQuads);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOQuads);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * arraySize, vertices, GL_STATIC_DRAW);
+	
+	m_VBOQuadsCount = 6 * count;
+		
 }

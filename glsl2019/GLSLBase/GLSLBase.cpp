@@ -26,7 +26,9 @@ void RenderScene(void)
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
 	// Renderer Test
-	g_Renderer->Test();
+	//g_Renderer->Test();
+	g_Renderer->Lecture2();
+	//g_Renderer->GenQuadsVBO(1000);
 
 	glutSwapBuffers();
 }
