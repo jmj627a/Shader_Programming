@@ -51,5 +51,7 @@ private:
 	
 	GLuint m_VBO_GridMesh = 0; 
 	int m_GridMesh_count = 0;
+
+	GLuint m_VBORectColor = 0;
 };
 

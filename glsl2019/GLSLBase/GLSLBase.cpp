@@ -26,9 +26,9 @@ void RenderScene(void)
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
 	// Renderer Test
-	//g_Renderer->Test();
+	g_Renderer->Test();
 	//g_Renderer->Lecture2();
-	g_Renderer->Lecture3();
+	//g_Renderer->Lecture3();
 
 
 	glutSwapBuffers();
@@ -64,9 +64,9 @@ int main(int argc, char **argv)
 	glutCreateWindow("GLSL KPU");
 
 	glewInit();
-	if (glewIsSupported("GL_VERSION_4_6"))
+	if (glewIsSupported("GL_VERSION_4_0"))
 	{
-		std::cout << " GL Version is 4.6\n ";
+		std::cout << " GL Version is 4.0\n ";
 	}
 	else
 	{

@@ -33,11 +33,17 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 
 void Renderer::CreateVertexBufferObjects()
 {
+	float size = 0.02f;
 	float rect[]
 		=
 	{
-		-0.5, -0.5, 0.f, -0.5, 0.5, 0.f, 0.5, 0.5, 0.f, //Triangle1
-		-0.5, -0.5, 0.f,  0.5, 0.5, 0.f, 0.5, -0.5, 0.f, //Triangle2
+		-size, -size, 0.f, 0.5, //x,y,z, value
+		- size,size, 0.f, 0.5,
+		size, size, 0.f, 0.5,//Triangle1
+
+		-size, -size, 0.f,  0.5,
+		size, size, 0.f, 0.5,
+		size, -size, 0.f, 0.5//Triangle2
 	};
 
 	glGenBuffers(1, &m_VBORect); //버텍스 버퍼 오브젝트가 성공을 했으면 1보다 큰 수가 리턴
@@ -56,7 +62,20 @@ void Renderer::CreateVertexBufferObjects()
 	glBufferData(GL_ARRAY_BUFFER, sizeof(tri), tri, GL_STATIC_DRAW);
 
 
+	float color[]
+		=
+	{
+		1,0,0,1, //r,g,b,a
+		1,0,0,1,
+		1,0,0,1,//Triangle1
 
+		1,0,0,1,
+		1,0,0,1,
+		1,0,0,1//Triangle2
+	};
+	glGenBuffers(1, &m_VBORectColor); //버텍스 버퍼 오브젝트가 성공을 했으면 1보다 큰 수가 리턴
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBORectColor);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(color), color, GL_STATIC_DRAW);
 }
 
 void Renderer::AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum ShaderType)
@@ -284,19 +303,39 @@ GLuint Renderer::CreateBmpTexture(char * filePath)
 	return temp;
 }
 
+float g_Time = 0.f;
+
 void Renderer::Test()
 {
 	glUseProgram(m_SolidRectShader);
 
-	int attribPosition = glGetAttribLocation(m_SolidRectShader, "a_Position");
-	glEnableVertexAttribArray(attribPosition);
+	//int attribPosition = glGetAttribLocation(m_SolidRectShader, "a_Position");
+
+	g_Time += 0.01f;
+	if (g_Time > 1.0f)
+		g_Time = 0.f;
+
+	GLuint uTime = glGetUniformLocation(m_SolidRectShader, "u_Time");
+	glUniform1f(uTime, g_Time);// 1.f);
+
+	GLuint aPos = glGetAttribLocation(m_SolidRectShader, "a_Position");
+	GLuint aCol = glGetAttribLocation(m_SolidRectShader, "a_Color");
+		
+	glEnableVertexAttribArray(aPos);
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBORect); //총 18개의 float point가 들어가있음.
-	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0); //그리고 vbo에 들어가 있는 것을 3개씩 꺼내서 sizeof(float)*3씩 뛰어서 읽어라
-	//저 자리에 0으로 넣으면 알아서 3칸씩 띄라고 하는구나 알고 문제없이 작동함
+	glVertexAttribPointer(aPos, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 4, 0); //그리고 vbo에 들어가 있는 것을 3개씩 꺼내서 sizeof(float)*3씩 뛰어서 읽어라
+	//저 자리에 0으로 넣으면 알아서 3칸씩 띄라고 하는구나! 알고 문제없이 작동함
+	//두번째 인자가 4라는건 4개씩 읽고, sizeof(float)*4 칸씩 뛰어라
+
+	glEnableVertexAttribArray(aCol);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBORectColor); //총 18개의 float point가 들어가있음.
+	glVertexAttribPointer(aCol, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 4, 0);
 
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
-	glDisableVertexAttribArray(attribPosition);
+	//glDisableVertexAttribArray(attribPosition);
+	glDisableVertexAttribArray(0); 
+	glDisableVertexAttribArray(1);
 }
 
 void Renderer::Lecture2()
