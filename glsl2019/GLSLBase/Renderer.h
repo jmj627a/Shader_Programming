@@ -23,7 +23,8 @@ public:
 	void Test();
 
 	void Lecture2(); //»ï°¢Çü
-	
+	void Lecture3();
+
 private:
 	void Initialize(int windowSizeX, int windowSizeY);
 	bool ReadFile(char* filename, std::string *target);
@@ -33,6 +34,7 @@ private:
 	unsigned char * Renderer::loadBMPRaw(const char * imagepath, unsigned int& outWidth, unsigned int& outHeight);
 
 	void GenQuadsVBO(int count);//·£´ýÇÑ À§Ä¡¿¡ »ï°¢Çü 1000°³
+	void CreateProxyGeometry();
 
 	bool m_Initialized = false;
 	
@@ -44,7 +46,10 @@ private:
 
 	GLuint m_VBOTri = 0;
 	GLuint m_VBOQuads = 0;
-
 	int m_VBOQuadsCount = 0;
+	
+	
+	GLuint m_VBO_GridMesh = 0; 
+	int m_GridMesh_count = 0;
 };
 
