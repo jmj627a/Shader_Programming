@@ -23,11 +23,12 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 
 	//Load shaders
 	m_SolidRectShader = CompileShaders("./Shaders/SolidRect.vs", "./Shaders/SolidRect.fs");
-	
+	m_SimpleVelShader = CompileShaders("./Shaders/SimpleVel.vs", "./Shaders/SimpleVel.fs");
+
 	//Create VBOs
 	CreateVertexBufferObjects();
 
-	//GenQuadsVBO(1000);
+	GenQuadsVBO(1000);
 	CreateProxyGeometry();
 }
 
@@ -340,7 +341,8 @@ void Renderer::Test()
 
 void Renderer::Lecture2()
 {
-	glUseProgram(m_SolidRectShader);
+	//glUseProgram(m_SolidRectShader);
+	glUseProgram(m_SimpleVelShader);
 
 	glEnableVertexAttribArray(0);
 	//glBindBuffer(GL_ARRAY_BUFFER, m_VBOTri); //총 18개의 float point가 들어가있음.
@@ -369,20 +371,50 @@ void Renderer::Lecture3()
 	glDisableVertexAttribArray(0);
 }
 
+void Renderer::Lecture4()
+{
+	glUseProgram(m_SimpleVelShader);
+
+	GLuint uTime = glGetUniformLocation(m_SimpleVelShader, "u_Time");
+	glUniform1f(uTime, g_Time);// 1.f); //float point 1개 
+	g_Time += 0.01f;
+
+	GLuint aPos = glGetAttribLocation(m_SimpleVelShader, "a_Position");
+	GLuint aVel = glGetAttribLocation(m_SimpleVelShader, "a_Vel");
+
+	glEnableVertexAttribArray(aPos);
+	glEnableVertexAttribArray(aVel);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOQuads); //총 18개의 float point가 들어가있음.
+	glVertexAttribPointer(aPos, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, 0); //그리고 vbo에 들어가 있는 것을 3개씩 꺼내서 sizeof(float)*3씩 뛰어서 읽어라
+	glVertexAttribPointer(aVel, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (GLvoid*)(sizeof(float)*3)); //그리고 vbo에 들어가 있는 것을 3개씩 꺼내서 sizeof(float)*3씩 뛰어서 읽어라
+
+	glDrawArrays(GL_TRIANGLES, 0, m_VBOQuadsCount);
+
+	glDisableVertexAttribArray(aPos);
+	glDisableVertexAttribArray(aVel);
+}
+
 void Renderer::GenQuadsVBO(int count)
 {
-	float randX, randY;
 	float size = 0.01f;
-	float arraySize = count * 3 * 6;
+	float arraySize = count * 6 * 6;
 	float *vertices = new float[arraySize];
 
 	for (int i = 0; i < count; i++)
 	{
-		int index = i * 18; //4로바꾸면 24가 됨
-		int temp = rand();
+		float randX, randY, randZ;
+		float randVelX, randVelY, randVelZ;
+		
+		int index = i * 36; //4로바꾸면 24가 됨
+		
 		randX = 2.f*(((float)rand() / (float)RAND_MAX) - 0.5f);
 		randY = 2.f*(((float)rand() / (float)RAND_MAX) - 0.5f);
+		
+		randVelX = 2.f*(((float)rand() / (float)RAND_MAX) - 0.5f);
+		randVelY = 2.f*(((float)rand() / (float)RAND_MAX) - 0.5f);
+		randVelZ = 0; //일단 2D고 이상한데로 갈까봐 0으로
 
+		/*
 		vertices[index] = randX - size; index++;
 		vertices[index] = randY - size; index++;
 		vertices[index] = 0.f; index++;
@@ -412,6 +444,65 @@ void Renderer::GenQuadsVBO(int count)
 		vertices[index] = randY - size; index++;
 		vertices[index] = 0.f; index++;
 		//vertices[index] = (float)i; index++;
+		*/
+
+		vertices[index] = randX - size; index++;
+		vertices[index] = randY - size; index++;
+		vertices[index] = 0.f; index++;
+		vertices[index] = randVelX; index++;
+		vertices[index] = randVelY; index++;
+		vertices[index] = randVelZ; index++;
+
+		//vertices[index] = (float)i; index++;
+
+		vertices[index] = randX - size; index++;
+		vertices[index] = randY + size; index++;
+		vertices[index] = 0.f; index++;
+
+		vertices[index] = randVelX; index++;
+		vertices[index] = randVelY; index++;
+		vertices[index] = randVelZ; index++;
+		//vertices[index] = (float)i; index++;
+
+		vertices[index] = randX + size; index++;
+		vertices[index] = randY + size; index++;
+		vertices[index] = 0.f; index++;
+		vertices[index] = randVelX; index++;
+		vertices[index] = randVelY; index++;
+		vertices[index] = randVelZ; index++;
+		//vertices[index] = (float)i; index++;
+
+	 /*   vertices[index] = randX; index++;
+		vertices[index] = randY; index++;
+		vertices[index] = randZ; index++;*/
+
+		vertices[index] = randX - size; index++;
+		vertices[index] = randY - size; index++;
+		vertices[index] = 0.f; index++;
+		vertices[index] = randVelX; index++;
+		vertices[index] = randVelY; index++;
+		vertices[index] = randVelZ; index++;
+		//vertices[index] = (float)i; index++;
+
+		vertices[index] = randX + size; index++;
+		vertices[index] = randY + size; index++;
+		vertices[index] = 0.f; index++;
+		vertices[index] = randVelX; index++;
+		vertices[index] = randVelY; index++;
+		vertices[index] = randVelZ; index++;
+		//vertices[index] = (float)i; index++;
+
+		vertices[index] = randX + size; index++;
+		vertices[index] = randY - size; index++;
+		vertices[index] = 0.f; index++;
+		vertices[index] = randVelX; index++;
+		vertices[index] = randVelY; index++;
+		vertices[index] = randVelZ; index++;
+		//vertices[index] = (float)i; index++;
+	 /*   vertices[index] = randX; index++;
+		vertices[index] = randY; index++;
+		vertices[index] = randZ; index++;*/
+
 	}
 
 	glGenBuffers(1, &m_VBOQuads);

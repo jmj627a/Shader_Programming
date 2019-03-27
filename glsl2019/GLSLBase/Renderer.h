@@ -24,6 +24,7 @@ public:
 
 	void Lecture2(); //»ï°¢Çü
 	void Lecture3();
+	void Lecture4();
 
 private:
 	void Initialize(int windowSizeX, int windowSizeY);
@@ -43,6 +44,7 @@ private:
 
 	GLuint m_VBORect = 0;
 	GLuint m_SolidRectShader = 0;
+	GLuint m_SimpleVelShader = 0;
 
 	GLuint m_VBOTri = 0;
 	GLuint m_VBOQuads = 0;

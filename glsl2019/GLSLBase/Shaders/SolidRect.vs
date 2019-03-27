@@ -13,7 +13,7 @@ void main()
 	float newX, newY;
 	newX= sin(u_Time*3.141562*2.0);
 	newY= cos(u_Time*3.141562*2.0);
-
+	
 	newX += a_Position.x;
 	newY += a_Position.y;
 
