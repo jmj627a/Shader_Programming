@@ -29,8 +29,10 @@ void RenderScene(void)
 	//g_Renderer->Test();
 	//g_Renderer->Lecture2();
 	//g_Renderer->Lecture3();
-	g_Renderer->Lecture4();
-
+	//g_Renderer->Lecture4();
+	//g_Renderer->Lecture5();
+	g_Renderer->Lecture6();
+	
 	glutSwapBuffers();
 }
 

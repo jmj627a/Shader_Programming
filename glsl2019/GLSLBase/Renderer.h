@@ -25,6 +25,9 @@ public:
 	void Lecture2(); //»ï°¢Çü
 	void Lecture3();
 	void Lecture4();
+	void Lecture5();
+	void Lecture6();
+
 
 private:
 	void Initialize(int windowSizeX, int windowSizeY);
@@ -34,7 +37,7 @@ private:
 	void CreateVertexBufferObjects(); 
 	unsigned char * Renderer::loadBMPRaw(const char * imagepath, unsigned int& outWidth, unsigned int& outHeight);
 
-	void GenQuadsVBO(int count);//·£´ýÇÑ À§Ä¡¿¡ »ï°¢Çü 1000°³
+	void GenQuadsVBO(int count, bool bRandPos, GLuint *id, GLuint *vcount);
 	void CreateProxyGeometry();
 
 	bool m_Initialized = false;
@@ -45,10 +48,13 @@ private:
 	GLuint m_VBORect = 0;
 	GLuint m_SolidRectShader = 0;
 	GLuint m_SimpleVelShader = 0;
+	GLuint m_SimpleELtimeShader = 0;
+	GLuint m_CenterParticleShader = 0;
+
 
 	GLuint m_VBOTri = 0;
 	GLuint m_VBOQuads = 0;
-	int m_VBOQuadsCount = 0;
+	GLuint m_VBOQuadsCount = 0;
 	
 	
 	GLuint m_VBO_GridMesh = 0; 

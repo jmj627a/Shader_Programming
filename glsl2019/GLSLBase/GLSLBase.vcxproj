@@ -173,6 +173,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Shaders\CenterParticle.fs" />
+    <None Include="Shaders\CenterParticle.vs" />
+    <None Include="Shaders\SimpleELtime.fs" />
+    <None Include="Shaders\SimpleELtime.vs" />
     <None Include="Shaders\SimpleVel.fs" />
     <None Include="Shaders\SimpleVel.vs" />
     <None Include="Shaders\SolidRect.fs" />

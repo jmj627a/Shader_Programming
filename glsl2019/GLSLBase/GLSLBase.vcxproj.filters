@@ -41,6 +41,18 @@
     <None Include="Shaders\SimpleVel.vs">
       <Filter>Shader</Filter>
     </None>
+    <None Include="Shaders\SimpleELtime.fs">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shaders\SimpleELtime.vs">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shaders\CenterParticle.fs">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shaders\CenterParticle.vs">
+      <Filter>Shader</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />

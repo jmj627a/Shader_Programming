@@ -24,12 +24,14 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	//Load shaders
 	m_SolidRectShader = CompileShaders("./Shaders/SolidRect.vs", "./Shaders/SolidRect.fs");
 	m_SimpleVelShader = CompileShaders("./Shaders/SimpleVel.vs", "./Shaders/SimpleVel.fs");
+	m_SimpleELtimeShader = CompileShaders("./Shaders/SimpleELtime.vs", "./Shaders/SimpleELtime.fs");
+	m_CenterParticleShader = CompileShaders("./Shaders/CenterParticle.vs", "./Shaders/CenterParticle.fs");
 
 	//Create VBOs
 	CreateVertexBufferObjects();
 
-	GenQuadsVBO(1000);
-	CreateProxyGeometry();
+	/*GenQuadsVBO(1000);
+	CreateProxyGeometry();*/
 }
 
 void Renderer::CreateVertexBufferObjects()
@@ -77,6 +79,9 @@ void Renderer::CreateVertexBufferObjects()
 	glGenBuffers(1, &m_VBORectColor); //버텍스 버퍼 오브젝트가 성공을 했으면 1보다 큰 수가 리턴
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBORectColor);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(color), color, GL_STATIC_DRAW);
+
+	GenQuadsVBO(10 ,false, &m_VBOQuads, &m_VBOQuadsCount);
+	CreateProxyGeometry();
 }
 
 void Renderer::AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum ShaderType)
@@ -377,7 +382,7 @@ void Renderer::Lecture4()
 
 	GLuint uTime = glGetUniformLocation(m_SimpleVelShader, "u_Time");
 	glUniform1f(uTime, g_Time);// 1.f); //float point 1개 
-	g_Time += 0.01f;
+	g_Time += 0.0001f;
 
 	GLuint aPos = glGetAttribLocation(m_SimpleVelShader, "a_Position");
 	GLuint aVel = glGetAttribLocation(m_SimpleVelShader, "a_Vel");
@@ -394,21 +399,94 @@ void Renderer::Lecture4()
 	glDisableVertexAttribArray(aVel);
 }
 
-void Renderer::GenQuadsVBO(int count)
+void Renderer::Lecture5()
 {
+	glUseProgram(m_SimpleELtimeShader);
+
+	GLuint uTime = glGetUniformLocation(m_SimpleELtimeShader, "u_Time");
+	GLuint uRepeat = glGetUniformLocation(m_SimpleELtimeShader, "u_Repeat");
+
+	glUniform1f(uTime, g_Time);// 1.f); //float point 1개 
+	g_Time += 0.0001f;
+
+	GLuint aPos = glGetAttribLocation(m_SimpleELtimeShader, "a_Position");
+	GLuint aVel = glGetAttribLocation(m_SimpleELtimeShader, "a_Vel");
+	GLuint aStartLife = glGetAttribLocation(m_SimpleELtimeShader, "a_StartLife");
+
+	glEnableVertexAttribArray(aPos);
+	glEnableVertexAttribArray(aVel);
+	glEnableVertexAttribArray(aStartLife);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOQuads); //총 18개의 float point가 들어가있음.
+	glVertexAttribPointer(aPos, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, 0); //그리고 vbo에 들어가 있는 것을 3개씩 꺼내서 sizeof(float)*3씩 뛰어서 읽어라
+	glVertexAttribPointer(aVel, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (GLvoid*)(sizeof(float) * 3)); //그리고 vbo에 들어가 있는 것을 3개씩 꺼내서 sizeof(float)*3씩 뛰어서 읽어라
+	glVertexAttribPointer(aStartLife, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (GLvoid*)(sizeof(float) * 6));
+	glDrawArrays(GL_TRIANGLES, 0, m_VBOQuadsCount);
+
+	glDisableVertexAttribArray(aPos);
+	glDisableVertexAttribArray(aVel);
+	glDisableVertexAttribArray(aStartLife);
+}
+
+void Renderer::Lecture6()
+{
+	GLuint shader = m_CenterParticleShader;
+	glUseProgram(shader);
+
+	GLuint uTime = glGetUniformLocation(shader, "u_Time");
+	GLuint uRepeat = glGetUniformLocation(shader, "u_Repeat");
+
+	glUniform1f(uTime, g_Time);// 1.f); //float point 1개 
+	g_Time += 0.0001f;
+
+	GLuint aPos = glGetAttribLocation(shader, "a_Position");
+	GLuint aStartLife = glGetAttribLocation(shader, "a_StartLife");
+
+	glEnableVertexAttribArray(aPos);
+	glEnableVertexAttribArray(aStartLife);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOQuads); //총 18개의 float point가 들어가있음.
+	glVertexAttribPointer(aPos, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 10, 0); //그리고 vbo에 들어가 있는 것을 3개씩 꺼내서 sizeof(float)*3씩 뛰어서 읽어라
+	glVertexAttribPointer(aStartLife, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 10, (GLvoid*)(sizeof(float)*6)); //그리고 vbo에 들어가 있는 것을 3개씩 꺼내서 sizeof(float)*3씩 뛰어서 읽어라
+	glDrawArrays(GL_TRIANGLES, 0, m_VBOQuadsCount);
+
+	glDisableVertexAttribArray(aPos);
+	glDisableVertexAttribArray(aStartLife);
+}
+
+void Renderer::GenQuadsVBO(int count, bool bRandPos, GLuint *id, GLuint *vcount)
+{
+
+	int verticesPerQuad = 6; //쿼드 하나 만들라고 버텍스 6개 쓸꺼다
+	int floatsPerVertex = 3 + 3 + 2;
+	int countQuad = count;
+
 	float size = 0.01f;
-	float arraySize = count * 6 * 6;
+	float arraySize = countQuad * verticesPerQuad *floatsPerVertex; //그려야 할 버텍스의 갯수
 	float *vertices = new float[arraySize];
 
-	for (int i = 0; i < count; i++)
+	for (int i = 0; i < countQuad; i++)
 	{
 		float randX, randY, randZ;
 		float randVelX, randVelY, randVelZ;
-		
-		int index = i * 36; //4로바꾸면 24가 됨
-		
-		randX = 2.f*(((float)rand() / (float)RAND_MAX) - 0.5f);
-		randY = 2.f*(((float)rand() / (float)RAND_MAX) - 0.5f);
+		float startTime, lifeTime;
+		float startTimeMax = 6.0f;
+		float lifeTimeMax = 3.0f;
+
+		int index = i * verticesPerQuad * floatsPerVertex; //쿼드당 필요한 float 개수씩 건너뜀
+
+		if (bRandPos)
+		{
+			randX = 2.f*(((float)rand() / (float)RAND_MAX) - 0.5f);
+			randY = 2.f*(((float)rand() / (float)RAND_MAX) - 0.5f);
+		}
+		else
+		{
+			randX = 0.0f;
+			randY = 0.0f;
+		}
+		startTime = ((float)rand() / (float)RAND_MAX) * startTimeMax;
+		lifeTime = ((float)rand() / (float)RAND_MAX) * lifeTimeMax;
 		
 		randVelX = 2.f*(((float)rand() / (float)RAND_MAX) - 0.5f);
 		randVelY = 2.f*(((float)rand() / (float)RAND_MAX) - 0.5f);
@@ -452,17 +530,17 @@ void Renderer::GenQuadsVBO(int count)
 		vertices[index] = randVelX; index++;
 		vertices[index] = randVelY; index++;
 		vertices[index] = randVelZ; index++;
-
-		//vertices[index] = (float)i; index++;
+		vertices[index] = startTime; index++;
+		vertices[index] = lifeTime; index++;
 
 		vertices[index] = randX - size; index++;
 		vertices[index] = randY + size; index++;
 		vertices[index] = 0.f; index++;
-
 		vertices[index] = randVelX; index++;
 		vertices[index] = randVelY; index++;
 		vertices[index] = randVelZ; index++;
-		//vertices[index] = (float)i; index++;
+		vertices[index] = startTime; index++;
+		vertices[index] = lifeTime; index++;
 
 		vertices[index] = randX + size; index++;
 		vertices[index] = randY + size; index++;
@@ -470,11 +548,8 @@ void Renderer::GenQuadsVBO(int count)
 		vertices[index] = randVelX; index++;
 		vertices[index] = randVelY; index++;
 		vertices[index] = randVelZ; index++;
-		//vertices[index] = (float)i; index++;
-
-	 /*   vertices[index] = randX; index++;
-		vertices[index] = randY; index++;
-		vertices[index] = randZ; index++;*/
+		vertices[index] = startTime; index++;
+		vertices[index] = lifeTime; index++;
 
 		vertices[index] = randX - size; index++;
 		vertices[index] = randY - size; index++;
@@ -482,7 +557,8 @@ void Renderer::GenQuadsVBO(int count)
 		vertices[index] = randVelX; index++;
 		vertices[index] = randVelY; index++;
 		vertices[index] = randVelZ; index++;
-		//vertices[index] = (float)i; index++;
+		vertices[index] = startTime; index++;
+		vertices[index] = lifeTime; index++;
 
 		vertices[index] = randX + size; index++;
 		vertices[index] = randY + size; index++;
@@ -490,7 +566,8 @@ void Renderer::GenQuadsVBO(int count)
 		vertices[index] = randVelX; index++;
 		vertices[index] = randVelY; index++;
 		vertices[index] = randVelZ; index++;
-		//vertices[index] = (float)i; index++;
+		vertices[index] = startTime; index++;
+		vertices[index] = lifeTime; index++;
 
 		vertices[index] = randX + size; index++;
 		vertices[index] = randY - size; index++;
@@ -498,18 +575,19 @@ void Renderer::GenQuadsVBO(int count)
 		vertices[index] = randVelX; index++;
 		vertices[index] = randVelY; index++;
 		vertices[index] = randVelZ; index++;
-		//vertices[index] = (float)i; index++;
-	 /*   vertices[index] = randX; index++;
-		vertices[index] = randY; index++;
-		vertices[index] = randZ; index++;*/
+		vertices[index] = startTime; index++;
+		vertices[index] = lifeTime; index++;
 
 	}
 
-	glGenBuffers(1, &m_VBOQuads);
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBOQuads);
+	GLuint vboID = 0;
+
+	glGenBuffers(1, &vboID);
+	glBindBuffer(GL_ARRAY_BUFFER, vboID);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * arraySize, vertices, GL_STATIC_DRAW);
 	
-	m_VBOQuadsCount = 6 * count;
+	*vcount = countQuad * verticesPerQuad;
+	*id = vboID;
 		
 }
 
