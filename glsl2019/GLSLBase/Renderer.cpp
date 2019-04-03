@@ -80,7 +80,7 @@ void Renderer::CreateVertexBufferObjects()
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBORectColor);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(color), color, GL_STATIC_DRAW);
 
-	GenQuadsVBO(10 ,false, &m_VBOQuads, &m_VBOQuadsCount);
+	GenQuadsVBO(100 ,false, &m_VBOQuads, &m_VBOQuadsCount);
 	CreateProxyGeometry();
 }
 
@@ -434,7 +434,7 @@ void Renderer::Lecture6()
 	glUseProgram(shader);
 
 	GLuint uTime = glGetUniformLocation(shader, "u_Time");
-	GLuint uRepeat = glGetUniformLocation(shader, "u_Repeat");
+	//GLuint uRepeat = glGetUniformLocation(shader, "u_Repeat");
 
 	glUniform1f(uTime, g_Time);// 1.f); //float point 1개 
 	g_Time += 0.0001f;
@@ -458,7 +458,7 @@ void Renderer::GenQuadsVBO(int count, bool bRandPos, GLuint *id, GLuint *vcount)
 {
 
 	int verticesPerQuad = 6; //쿼드 하나 만들라고 버텍스 6개 쓸꺼다
-	int floatsPerVertex = 3 + 3 + 2;
+	int floatsPerVertex = 3 + 3 + 2+ 2; //
 	int countQuad = count;
 
 	float size = 0.01f;
@@ -472,6 +472,13 @@ void Renderer::GenQuadsVBO(int count, bool bRandPos, GLuint *id, GLuint *vcount)
 		float startTime, lifeTime;
 		float startTimeMax = 6.0f;
 		float lifeTimeMax = 3.0f;
+
+		float ratio, amp;
+		float ratioMin = 2.f;
+		float ratioThres = 4.f;
+		float ampMin = -0.1f;
+		float ampThres = 0.2f;
+
 
 		int index = i * verticesPerQuad * floatsPerVertex; //쿼드당 필요한 float 개수씩 건너뜀
 
@@ -491,6 +498,9 @@ void Renderer::GenQuadsVBO(int count, bool bRandPos, GLuint *id, GLuint *vcount)
 		randVelX = 2.f*(((float)rand() / (float)RAND_MAX) - 0.5f);
 		randVelY = 2.f*(((float)rand() / (float)RAND_MAX) - 0.5f);
 		randVelZ = 0; //일단 2D고 이상한데로 갈까봐 0으로
+
+		ratio = ratioMin + ((float)rand() / (float)RAND_MAX) * ratioThres;
+		amp = ampMin + ((float)rand() / (float)RAND_MAX) * ampThres;
 
 		/*
 		vertices[index] = randX - size; index++;
@@ -532,6 +542,8 @@ void Renderer::GenQuadsVBO(int count, bool bRandPos, GLuint *id, GLuint *vcount)
 		vertices[index] = randVelZ; index++;
 		vertices[index] = startTime; index++;
 		vertices[index] = lifeTime; index++;
+		vertices[index] = ratio; index++;
+		vertices[index] = amp; index++;
 
 		vertices[index] = randX - size; index++;
 		vertices[index] = randY + size; index++;
@@ -541,6 +553,8 @@ void Renderer::GenQuadsVBO(int count, bool bRandPos, GLuint *id, GLuint *vcount)
 		vertices[index] = randVelZ; index++;
 		vertices[index] = startTime; index++;
 		vertices[index] = lifeTime; index++;
+		vertices[index] = ratio; index++;
+		vertices[index] = amp; index++;
 
 		vertices[index] = randX + size; index++;
 		vertices[index] = randY + size; index++;
@@ -550,6 +564,8 @@ void Renderer::GenQuadsVBO(int count, bool bRandPos, GLuint *id, GLuint *vcount)
 		vertices[index] = randVelZ; index++;
 		vertices[index] = startTime; index++;
 		vertices[index] = lifeTime; index++;
+		vertices[index] = ratio; index++;
+		vertices[index] = amp; index++;
 
 		vertices[index] = randX - size; index++;
 		vertices[index] = randY - size; index++;
@@ -559,6 +575,8 @@ void Renderer::GenQuadsVBO(int count, bool bRandPos, GLuint *id, GLuint *vcount)
 		vertices[index] = randVelZ; index++;
 		vertices[index] = startTime; index++;
 		vertices[index] = lifeTime; index++;
+		vertices[index] = ratio; index++;
+		vertices[index] = amp; index++;
 
 		vertices[index] = randX + size; index++;
 		vertices[index] = randY + size; index++;
@@ -568,6 +586,8 @@ void Renderer::GenQuadsVBO(int count, bool bRandPos, GLuint *id, GLuint *vcount)
 		vertices[index] = randVelZ; index++;
 		vertices[index] = startTime; index++;
 		vertices[index] = lifeTime; index++;
+		vertices[index] = ratio; index++;
+		vertices[index] = amp; index++;
 
 		vertices[index] = randX + size; index++;
 		vertices[index] = randY - size; index++;
@@ -577,7 +597,8 @@ void Renderer::GenQuadsVBO(int count, bool bRandPos, GLuint *id, GLuint *vcount)
 		vertices[index] = randVelZ; index++;
 		vertices[index] = startTime; index++;
 		vertices[index] = lifeTime; index++;
-
+		vertices[index] = ratio; index++;
+		vertices[index] = amp; index++;
 	}
 
 	GLuint vboID = 0;

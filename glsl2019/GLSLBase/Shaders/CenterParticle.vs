@@ -5,7 +5,7 @@ in vec2 a_Temp;
 in vec4 a_StartLife;
 
 uniform float u_Time; //1.f
-uniform bool u_Repeat = true; 
+//uniform bool u_Repeat = true; 
 const float PI= 3.141592;
 
 void main()
@@ -16,34 +16,22 @@ void main()
 	float ratio = a_StartLife.z;
 	float amp = a_StartLife.w;
 
-	//float newTime = fract(u_Time);
 	float newTime = u_Time - startTime; //반복x
 
 		if(newTime > 0)
 	{
 		newTime = mod(newTime, lifeTime);
-		float life = newTime;
-		float remainingLife = lifeTime - life;
 		
+		amp = amp * newTime  ;
 		newPos.x  += newTime ;
-		newPos.y  += sin(newTime * PI * 2); //sin(newTime * PI * 2); 정확히 한 주기
-
-		if(u_Repeat == true)
-		{
-			remainingLife = 1.f;
-			newTime = mod(newTime, lifeTime);
-		}
-		
-		if(remainingLife < 0)
-		{
-			newPos = vec3(10000,10000,10000);
-		}
+		newPos.y  += sin(newTime * PI * 2 * ratio) * amp; //sin(newTime * PI * 2); 정확히 한 주기
+		//sin안쪽은 주기를 조절, 바깥쪽은 폭을 조절
 	}
 	else
 	{
 		newPos = vec3(10000,10000,10000);
 	}
 
-	gl_Position = vec4(newPos , 1);
+	gl_Position = vec4(newPos.xyz , 1);
 }
 
