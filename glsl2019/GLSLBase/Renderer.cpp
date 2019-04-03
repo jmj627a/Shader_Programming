@@ -80,7 +80,7 @@ void Renderer::CreateVertexBufferObjects()
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBORectColor);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(color), color, GL_STATIC_DRAW);
 
-	GenQuadsVBO(100 ,false, &m_VBOQuads, &m_VBOQuadsCount);
+	GenQuadsVBO(10000 ,false, &m_VBOQuads, &m_VBOQuadsCount);
 	CreateProxyGeometry();
 }
 
@@ -427,7 +427,7 @@ void Renderer::Lecture5()
 	glDisableVertexAttribArray(aVel);
 	glDisableVertexAttribArray(aStartLife);
 }
-
+// .vs코드들을 실행하면, GenQuadsVBO()에서 cpu에 있던걸 gpu로 올리고, Lecture6()함수 윗부분에서 변수들 세팅해주고, 밑에 glDrawArrays() 함수에서 그려줘라 명령
 void Renderer::Lecture6()
 {
 	GLuint shader = m_CenterParticleShader;
@@ -440,25 +440,34 @@ void Renderer::Lecture6()
 	g_Time += 0.0001f;
 
 	GLuint aPos = glGetAttribLocation(shader, "a_Position");
+	GLuint aVel = glGetAttribLocation(shader, "a_Vel");
 	GLuint aStartLife = glGetAttribLocation(shader, "a_StartLife");
+	GLuint aRandValue = glGetAttribLocation(shader, "a_RandValue");
 
 	glEnableVertexAttribArray(aPos);
+	glEnableVertexAttribArray(aVel);
 	glEnableVertexAttribArray(aStartLife);
+	glEnableVertexAttribArray(aRandValue);
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOQuads); //총 18개의 float point가 들어가있음.
-	glVertexAttribPointer(aPos, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 10, 0); //그리고 vbo에 들어가 있는 것을 3개씩 꺼내서 sizeof(float)*3씩 뛰어서 읽어라
-	glVertexAttribPointer(aStartLife, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 10, (GLvoid*)(sizeof(float)*6)); //그리고 vbo에 들어가 있는 것을 3개씩 꺼내서 sizeof(float)*3씩 뛰어서 읽어라
-	glDrawArrays(GL_TRIANGLES, 0, m_VBOQuadsCount);
+	glVertexAttribPointer(aPos, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 11, 0); //그리고 vbo에 들어가 있는 것을 3개씩 꺼내서 sizeof(float)*3씩 뛰어서 읽어라
+	glVertexAttribPointer(aVel, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 11, (GLvoid*)(sizeof(float)*3)); //그리고 vbo에 들어가 있는 것을 3개씩 꺼내서 sizeof(float)*3씩 뛰어서 읽어라
+	glVertexAttribPointer(aStartLife, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 11, (GLvoid*)(sizeof(float) * 6)); //그리고 vbo에 들어가 있는 것을 3개씩 꺼내서 sizeof(float)*3씩 뛰어서 읽어라
+	glVertexAttribPointer(aRandValue, 1, GL_FLOAT, GL_FALSE, sizeof(float) * 11, (GLvoid*)(sizeof(float) * 7)); //그리고 vbo에 들어가 있는 것을 3개씩 꺼내서 sizeof(float)*3씩 뛰어서 읽어라
+	
+	glDrawArrays(GL_TRIANGLES, 0, m_VBOQuadsCount);// 그려라
 
 	glDisableVertexAttribArray(aPos);
+	glDisableVertexAttribArray(aVel);
 	glDisableVertexAttribArray(aStartLife);
+	glDisableVertexAttribArray(aRandValue);
 }
 
 void Renderer::GenQuadsVBO(int count, bool bRandPos, GLuint *id, GLuint *vcount)
 {
 
 	int verticesPerQuad = 6; //쿼드 하나 만들라고 버텍스 6개 쓸꺼다
-	int floatsPerVertex = 3 + 3 + 2+ 2; //
+	int floatsPerVertex = 3 + 3 + 2+ 2 + 1; //x,y,z, vx, vy ,vz, s,l, r,a,randVal
 	int countQuad = count;
 
 	float size = 0.01f;
@@ -479,6 +488,7 @@ void Renderer::GenQuadsVBO(int count, bool bRandPos, GLuint *id, GLuint *vcount)
 		float ampMin = -0.1f;
 		float ampThres = 0.2f;
 
+		float randValue = 0.f, randThres = 1.f;
 
 		int index = i * verticesPerQuad * floatsPerVertex; //쿼드당 필요한 float 개수씩 건너뜀
 
@@ -501,6 +511,8 @@ void Renderer::GenQuadsVBO(int count, bool bRandPos, GLuint *id, GLuint *vcount)
 
 		ratio = ratioMin + ((float)rand() / (float)RAND_MAX) * ratioThres;
 		amp = ampMin + ((float)rand() / (float)RAND_MAX) * ampThres;
+
+		randValue = randValue + ((float)rand() / (float)RAND_MAX) * randThres;
 
 		/*
 		vertices[index] = randX - size; index++;
@@ -544,6 +556,7 @@ void Renderer::GenQuadsVBO(int count, bool bRandPos, GLuint *id, GLuint *vcount)
 		vertices[index] = lifeTime; index++;
 		vertices[index] = ratio; index++;
 		vertices[index] = amp; index++;
+		vertices[index] = randValue; index++;
 
 		vertices[index] = randX - size; index++;
 		vertices[index] = randY + size; index++;
@@ -555,6 +568,7 @@ void Renderer::GenQuadsVBO(int count, bool bRandPos, GLuint *id, GLuint *vcount)
 		vertices[index] = lifeTime; index++;
 		vertices[index] = ratio; index++;
 		vertices[index] = amp; index++;
+		vertices[index] = randValue; index++;
 
 		vertices[index] = randX + size; index++;
 		vertices[index] = randY + size; index++;
@@ -566,6 +580,7 @@ void Renderer::GenQuadsVBO(int count, bool bRandPos, GLuint *id, GLuint *vcount)
 		vertices[index] = lifeTime; index++;
 		vertices[index] = ratio; index++;
 		vertices[index] = amp; index++;
+		vertices[index] = randValue; index++;
 
 		vertices[index] = randX - size; index++;
 		vertices[index] = randY - size; index++;
@@ -577,6 +592,7 @@ void Renderer::GenQuadsVBO(int count, bool bRandPos, GLuint *id, GLuint *vcount)
 		vertices[index] = lifeTime; index++;
 		vertices[index] = ratio; index++;
 		vertices[index] = amp; index++;
+		vertices[index] = randValue; index++;
 
 		vertices[index] = randX + size; index++;
 		vertices[index] = randY + size; index++;
@@ -588,6 +604,7 @@ void Renderer::GenQuadsVBO(int count, bool bRandPos, GLuint *id, GLuint *vcount)
 		vertices[index] = lifeTime; index++;
 		vertices[index] = ratio; index++;
 		vertices[index] = amp; index++;
+		vertices[index] = randValue; index++;
 
 		vertices[index] = randX + size; index++;
 		vertices[index] = randY - size; index++;
@@ -599,17 +616,20 @@ void Renderer::GenQuadsVBO(int count, bool bRandPos, GLuint *id, GLuint *vcount)
 		vertices[index] = lifeTime; index++;
 		vertices[index] = ratio; index++;
 		vertices[index] = amp; index++;
+		vertices[index] = randValue; index++;
+
 	}
 
 	GLuint vboID = 0;
 
-	glGenBuffers(1, &vboID);
-	glBindBuffer(GL_ARRAY_BUFFER, vboID);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * arraySize, vertices, GL_STATIC_DRAW);
+	glGenBuffers(1, &vboID); //cpu에서 gpu로 접근하는 id
+	glBindBuffer(GL_ARRAY_BUFFER, vboID); //array형태의 자료구조로 사용하겠ㄷ다
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * arraySize, vertices, GL_STATIC_DRAW); //위에서 만든 행렬을 버퍼에 복사
 	
 	*vcount = countQuad * verticesPerQuad;
 	*id = vboID;
-		
+
+	delete(vertices);
 }
 
 
